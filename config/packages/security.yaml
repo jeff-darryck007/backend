@@ -1,0 +1,45 @@
+security:
+    password_hashers:
+        App\Entity\Users: 'auto'
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+            algorithm: 'auto'
+            cost: 15
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\Users
+                property: email   # ✅ correspond à ta colonne en BDD
+
+    firewalls:
+        # 🔐 Firewall pour la connexion
+        login:
+            pattern: ^/api/login$
+            stateless: true
+            json_login:
+                check_path: /api/login          # ✅ correspond à la route réelle
+                username_path: email             # ✅ ton champ de login
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        # 🔐 Firewall JWT pour toutes les autres routes protégées
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+
+        # 🔓 Profiler/dev
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # 🔓 Firewall principal
+        main:
+            lazy: true
+            provider: app_user_provider
+
+    access_control:
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
