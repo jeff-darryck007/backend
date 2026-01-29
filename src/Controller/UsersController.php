@@ -30,6 +30,27 @@ final class UsersController extends AbstractController
         ], 400);
     }
 
+    // RECUPERER UN UTILISATEUR PAR TOKEN  
+    #[Route('/me', name: 'api_me', methods: ['GET'])] 
+    public function me(#[CurrentUser] ?User $user): JsonResponse 
+    {
+        if (!$user) {
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Utilisateur non authentifié'
+            ], 401);
+        }
+
+        return $this->json([
+            'status' => 'success',
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles(),
+            ]
+        ]);
+    }
+
     #[Route('/register', name: 'register', methods: 'post')]
     public function register(ManagerRegistry $doctrine, Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {

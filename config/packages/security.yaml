@@ -9,32 +9,32 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\Users
-                property: email   # ✅ correspond à ta colonne en BDD
+                property: email
 
     firewalls:
-        # 🔐 Firewall pour la connexion
+        # 🔐 LOGIN (JWT)
         login:
             pattern: ^/api/login$
             stateless: true
             json_login:
-                check_path: /api/login          # ✅ correspond à la route réelle
-                username_path: email             # ✅ ton champ de login
+                check_path: /api/login
+                username_path: email
                 password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
+                success_handler: App\Security\JWTAuthenticationSuccessHandler
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-        # 🔐 Firewall JWT pour toutes les autres routes protégées
+        # 🔐 API protégée par JWT
         api:
             pattern: ^/api
             stateless: true
             jwt: ~
 
-        # 🔓 Profiler/dev
+        # 🔓 DEV
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # 🔓 Firewall principal
+        # 🔓 MAIN
         main:
             lazy: true
             provider: app_user_provider
